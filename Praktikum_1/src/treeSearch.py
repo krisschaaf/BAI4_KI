@@ -20,13 +20,9 @@ def execute(node, strategy):
 
 
 def bfs(node, openList, closedList):
-    # List<State> closedList
-    # List<List<State>> openList
-
-    if isTargetState(node.state):
-        return node
-
-    createChildNodes(node, openList, closedList)
+    result = createChildNodes(node, openList, closedList)
+    print(result)
+    return result
 
 
 # Node int[4][4]
@@ -54,8 +50,6 @@ def nextValueFound(state, y, x, currentValue):
         if not (newY > 3 or newY < 0 or newX > 3 or newX < 0):
             intValue = state[newY][newX]
             if intValue == currentValue + 1:
-                print("Found:")
-                print(intValue)
                 return True
 
     return False
@@ -73,47 +67,52 @@ def createChildNodes(node, openList, closedList):
 
         if not (newY > 3 or newY < 0 or newX > 3 or newX < 0):
             newState = np.empty_like(node.state)
-
-            # Copy values from the original array to the new array
             newState[:] = node.state
-
             newState[y][x] = newState[newY][newX]
             newState[newY][newX] = 0
-            childNode = Node([],newState)
+
+            # termination condition
+            if isTargetState(node.state):
+                return node
+
+            childNode = Node([], newState)
+
             # -1 means last element of list
             if (not any(np.array_equal(childNode.state, element.state) for element in closedList) and
                     not any(np.array_equal(childNode.state, element[-1].state) for element in openList)):
-                # TODO fix: get list from openlist when last item is node and append to node to that list
+
                 for list in openList:
-                    if np.array_equal(list[-1].state,node.state):
+                    if np.array_equal(list[-1].state, node.state):
                         newList = list.copy()
                         newList.append(childNode)
                         openList.append(newList)
 
+                node.childNodes.append(childNode)
 
-            #elif not any(np.array_equal(newNode, element) for element in closedList) and any(
-                #    np.array_equal(newNode, element) for element in openList):
-                # which node hast shortest path, add that one, delete other one
-                print("tbd")
-
-            node.childNodes.append(childNode)
     for list in openList:
         if np.array_equal(list[-1].state, node.state):
             openList.remove(list)
+
     closedList.append(node)
 
-    # remove listitem which has node as last element from openlist
+    if len(node.childNodes) == 0:
+        createChildNodes(openList.pop().pop(), openList, closedList)
 
-    return openList
+    for childNode in node.childNodes:
+        if not any(np.array_equal(childNode.state, element.state) for element in closedList):
+            return createChildNodes(childNode, openList, closedList)
+
 
 class Node:
     def __init__(self, childNodes, state):
         self.state = state
         self.childNodes = childNodes
+
     def getState(self):
         return self.state
+
     def getChildNodes(self):
         return self.childNodes
+
     def addChildNode(self, node):
         self.childNodes.append(node)
-
