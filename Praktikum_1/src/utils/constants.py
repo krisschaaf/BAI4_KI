@@ -1,4 +1,4 @@
-from treeSearch import *
+from src.Node import *
 
 targetArray = Node([], np.array([
     [15, 10, 3, 6],
