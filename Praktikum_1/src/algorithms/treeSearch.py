@@ -43,20 +43,23 @@ def treeSearch(problem, _strategy, _maxDepth, idsDepth=0):
 
         for childNode in childNodes:
             if childNode not in closedList:
-
-                if _strategy == Strategy.A_STAR:
-                    newTreeSearchElement = TreeSearchElement(
-                        childNode,
-                        treeSearchElement.path[:],
-                        treeSearchElement.depth + 1,
-                        heuristic(childNode) + treeSearchElement.node.cost
-                    )
-                    heapq.heappush(openList, newTreeSearchElement)
-                else:
-                    openList.append(
-                        TreeSearchElement(childNode, treeSearchElement.path[:], treeSearchElement.depth + 1))
+                extendOpenList(_strategy, childNode, openList, treeSearchElement)
 
     return None
+
+
+def extendOpenList(_strategy, childNode, openList, treeSearchElement):
+    if _strategy == Strategy.A_STAR:
+        newTreeSearchElement = TreeSearchElement(
+            childNode,
+            treeSearchElement.path[:],
+            treeSearchElement.depth + 1,
+            heuristic(childNode) + treeSearchElement.node.cost
+        )
+        heapq.heappush(openList, newTreeSearchElement)
+    else:
+        openList.append(
+            TreeSearchElement(childNode, treeSearchElement.path[:], treeSearchElement.depth + 1))
 
 
 def iddfs(_startNode, _maxDepth, _maxIdsDepth):
