@@ -1,4 +1,4 @@
-from src.Node import *
+from src.classes.Node import *
 
 targetArray = Node(np.array([
     [15, 10, 3, 6],

@@ -50,8 +50,9 @@ def generateChildNodes(node):
 
 
 class Node:
-    def __init__(self, state, childNodes=None):
+    def __init__(self, state, childNodes=None, cost=0):
         if childNodes is None:
             childNodes = []
         self.state = state
         self.childNodes = childNodes
+        self.cost = cost
