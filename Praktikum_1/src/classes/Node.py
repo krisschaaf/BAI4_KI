@@ -20,7 +20,16 @@ ALLOWED_BLANK_FIELD_STEPS = np.array([
 ])
 
 
-def isTargetState(state) -> bool:
+class Node:
+    def __init__(self, state, childNodes=None, cost=0):
+        if childNodes is None:
+            childNodes = []
+        self.state = state
+        self.childNodes = childNodes
+        self.cost = cost
+
+
+def isTargetState(state: list) -> bool:
     [[y, x]] = np.argwhere(state == 1)
 
     currentValue: int = 1
@@ -35,29 +44,29 @@ def isTargetState(state) -> bool:
     return False
 
 
-def nextValueFound(state, y, x, currentValue):
+def nextValueFound(state: list, y: int, x: int, currentValue: int) -> bool:
     for allowedSpringerStep in ALLOWED_SPRINGER_STEPS:
-        newX = x + allowedSpringerStep[1]
-        newY = y + allowedSpringerStep[0]
+        newX: int = x + allowedSpringerStep[1]
+        newY: int = y + allowedSpringerStep[0]
 
         if not (newY > 3 or newY < 0 or newX > 3 or newX < 0):
-            intValue = state[newY][newX]
+            intValue: int = state[newY][newX]
             if intValue == currentValue + 1:
                 return True
 
     return False
 
 
-def generateChildNodes(node):
+def generateChildNodes(node: Node) -> list:
     [[y, x]] = np.argwhere(node.state == 0)
-    childNodes = []
+    childNodes: list = []
 
     for allowedBlankFieldStep in ALLOWED_BLANK_FIELD_STEPS:
-        newX = x + allowedBlankFieldStep[1]
-        newY = y + allowedBlankFieldStep[0]
+        newX: int = x + allowedBlankFieldStep[1]
+        newY: int = y + allowedBlankFieldStep[0]
 
         if not (newY > 3 or newY < 0 or newX > 3 or newX < 0):
-            newState = np.empty_like(node.state)
+            newState: list = np.empty_like(node.state)
             newState[:] = node.state
             newState[y][x] = newState[newY][newX]
             newState[newY][newX] = 0
@@ -65,12 +74,3 @@ def generateChildNodes(node):
             childNodes.append(Node(newState))
 
     return childNodes
-
-
-class Node:
-    def __init__(self, state, childNodes=None, cost=0):
-        if childNodes is None:
-            childNodes = []
-        self.state = state
-        self.childNodes = childNodes
-        self.cost = cost

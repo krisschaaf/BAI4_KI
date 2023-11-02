@@ -1,7 +1,7 @@
 from src.classes.Node import *
 
 
-def heuristic(node) -> int:
+def heuristic(node: Node) -> int:
     [[y, x]] = np.argwhere(node.state == 1)
 
     currentValue: int = 1

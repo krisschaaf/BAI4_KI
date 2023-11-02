@@ -5,21 +5,21 @@ from src.classes.TreeSearchElement import TreeSearchElement
 from src.utils.enums import Strategy
 
 
-def treeSearch(problem, _strategy, _maxDepth, idsDepth=0):
+def treeSearch(problem: Node, _strategy: Strategy, _maxDepth: int, idsDepth: int = 0):
     closedList = set()
-    openList = [TreeSearchElement(problem)]
+    openList: list = [TreeSearchElement(problem)]
 
     while openList:
 
         match _strategy:
             case Strategy.BFS:
-                treeSearchElement = openList.pop(0)  # FiFo
+                treeSearchElement: TreeSearchElement = openList.pop(0)  # FiFo
             case Strategy.DFS:
-                treeSearchElement = openList.pop()  # FiLo (Stack)
+                treeSearchElement: TreeSearchElement = openList.pop()  # FiLo (Stack)
             case Strategy.IDS:
-                treeSearchElement = openList.pop()  # FiLo (Stack)
+                treeSearchElement: TreeSearchElement = openList.pop()  # FiLo (Stack)
             case Strategy.A_STAR:
-                treeSearchElement = heapq.heappop(openList)  # Priority Queue
+                treeSearchElement: TreeSearchElement = heapq.heappop(openList)  # Priority Queue
             case _:
                 raise Exception("Strategy not available")
 
@@ -39,7 +39,7 @@ def treeSearch(problem, _strategy, _maxDepth, idsDepth=0):
         if _strategy == Strategy.IDS and treeSearchElement.depth >= idsDepth:
             continue
 
-        childNodes = generateChildNodes(treeSearchElement.node)
+        childNodes: list = generateChildNodes(treeSearchElement.node)
 
         for childNode in childNodes:
             if childNode not in closedList:
@@ -48,7 +48,7 @@ def treeSearch(problem, _strategy, _maxDepth, idsDepth=0):
     return None
 
 
-def extendOpenList(_strategy, childNode, openList, treeSearchElement):
+def extendOpenList(_strategy: Strategy, childNode: Node, openList: list, treeSearchElement: TreeSearchElement):
     if _strategy == Strategy.A_STAR:
         newTreeSearchElement = TreeSearchElement(
             childNode,
@@ -62,9 +62,9 @@ def extendOpenList(_strategy, childNode, openList, treeSearchElement):
             TreeSearchElement(childNode, treeSearchElement.path[:], treeSearchElement.depth + 1))
 
 
-def iddfs(_startNode, _maxDepth, _maxIdsDepth):
+def iddfs(_startNode: Node, _maxDepth: int, _maxIdsDepth: int):
     for depth in range(_maxIdsDepth + 1):
-        result = treeSearch(_startNode, Strategy.IDS, _maxDepth, depth)
+        result: list | None = treeSearch(_startNode, Strategy.IDS, _maxDepth, depth)
         if result:
             return result
 
