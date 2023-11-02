@@ -29,7 +29,7 @@ class TreeSearchElement:
 
 def treeSearch(problem, strategy, maxDepth):
     closedList = set()
-    openList = [TreeSearchElement(problem, [], 0)]
+    openList = [TreeSearchElement(problem)]
 
     while openList:
 
