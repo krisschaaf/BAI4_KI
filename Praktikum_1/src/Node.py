@@ -44,16 +44,15 @@ def generateChildNodes(node):
             newState[y][x] = newState[newY][newX]
             newState[newY][newX] = 0
 
-            childNodes.append([Node([], newState), 0])
+            childNodes.append(Node(newState))
 
     return childNodes
 
 
 class Node:
-    def __init__(self, childNodes, state, cost=0):
+    def __init__(self, state, childNodes=None, cost=0):
+        if childNodes is None:
+            childNodes = []
         self.state = state
         self.childNodes = childNodes
         self.cost = cost
-
-    def __lt__(self, other):
-        return self.cost < other.cost
