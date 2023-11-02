@@ -1,5 +1,23 @@
 import numpy as np
-from src.utils import constants
+
+
+ALLOWED_SPRINGER_STEPS = np.array([
+    [-2, -1],
+    [-2, +1],
+    [-1, -2],
+    [+1, -2],
+    [-1, +2],
+    [+1, +2],
+    [+2, -1],
+    [+2, +1]]
+)
+
+ALLOWED_BLANK_FIELD_STEPS = np.array([
+    [0, -1],
+    [0, +1],
+    [-1, 0],
+    [+1, 0]
+])
 
 
 def isTargetState(state) -> bool:
@@ -18,7 +36,7 @@ def isTargetState(state) -> bool:
 
 
 def nextValueFound(state, y, x, currentValue):
-    for allowedSpringerStep in constants.ALLOWED_SPRINGER_STEPS:
+    for allowedSpringerStep in ALLOWED_SPRINGER_STEPS:
         newX = x + allowedSpringerStep[1]
         newY = y + allowedSpringerStep[0]
 
@@ -34,7 +52,7 @@ def generateChildNodes(node):
     [[y, x]] = np.argwhere(node.state == 0)
     childNodes = []
 
-    for allowedBlankFieldStep in constants.ALLOWED_BLANK_FIELD_STEPS:
+    for allowedBlankFieldStep in ALLOWED_BLANK_FIELD_STEPS:
         newX = x + allowedBlankFieldStep[1]
         newY = y + allowedBlankFieldStep[0]
 

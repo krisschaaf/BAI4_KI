@@ -35,21 +35,3 @@ thirdExample = Node(np.array([
     [4, 14, 0, 11],
     [12, 7, 5, 2],
     [9, 1, 8, 13]]))
-
-ALLOWED_SPRINGER_STEPS = np.array([
-    [-2, -1],
-    [-2, +1],
-    [-1, -2],
-    [+1, -2],
-    [-1, +2],
-    [+1, +2],
-    [+2, -1],
-    [+2, +1]]
-)
-
-ALLOWED_BLANK_FIELD_STEPS = np.array([
-    [0, -1],
-    [0, +1],
-    [-1, 0],
-    [+1, 0]
-])
