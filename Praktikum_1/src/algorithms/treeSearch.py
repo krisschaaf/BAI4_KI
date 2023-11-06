@@ -17,7 +17,7 @@ def treeSearch(problem: Node, _strategy: Strategy, _maxDepth: int, idsDepth: int
             case Strategy.DFS:
                 treeSearchElement: TreeSearchElement = openList.pop()  # FiLo (Stack)
             case Strategy.IDS:
-                treeSearchElement: TreeSearchElement = openList.pop(0)  # FiFo
+                treeSearchElement: TreeSearchElement = openList.pop()  # FiLo
             case Strategy.A_STAR:
                 treeSearchElement: TreeSearchElement = heapq.heappop(openList)  # Priority Queue
             case _:
