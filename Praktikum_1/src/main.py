@@ -15,7 +15,7 @@ def printResult(_path, duration):
 
 
 if __name__ == '__main__':
-    strategy: Strategy = Strategy.IDS  # choose strategy here
+    strategy: Strategy = Strategy.BFS  # choose strategy here
     startNode: Node = constants.thirdExample  # choose example here
     maxDepth: int = 1000  # choose max depth for tree search
     maxIdsDepth: int = 5  # only relevant for IDS - choose max depth for iteration depth
