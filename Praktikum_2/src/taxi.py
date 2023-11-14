@@ -1,90 +1,113 @@
-import numpy as np
 import gym
+import numpy as np
+from gym import *
 import random
 
 
 def main():
-    # create Taxi environment
-    env: gym.Env = gym.make('Taxi-v3')
+    # env: gym.Env = gym.make('Taxi-v3', disable_env_checker=True)
+    env: gym.Env = gym.make('FrozenLake-v1', is_slippery=False)
 
     # initialize q-table
-    state_size = env.observation_space.n
-    action_size = env.action_space
+    state_size: Space = env.observation_space.n
+    action_size: Space = env.action_space.n
     qtable = np.zeros((state_size, action_size))
 
     # hyperparameters
-    learning_rate = 0.9
-    discount_rate = 0.8
-    epsilon = 1.0
-    decay_rate = 0.005
+    learning_rate = 0.9  # alpha
+    discount_rate = 0.8  # gamma, discount factor to give more or less importance to the next reward
+    epsilon = 1.0  # explore vs exploit
 
     # training variables
-    num_episodes = 1000
-    max_steps = 99  # per episode
+    num_episodes = 10000
+    max_steps = 100  # per episode
+    counter_explore = 0
+    counter_exploit = 0
 
     # training
     for episode in range(num_episodes):
 
         # reset the environment
-        state = env.reset()
-        done = False
+        state, _ = env.reset()  # dont use info
+        terminated = False
+        truncated = False
+
+        action = env.action_space.sample()
 
         for s in range(max_steps):
+        # while not terminated:
 
-            # exploration-exploitation tradeoff
+            # exploration vs exploitation
             if random.uniform(0, 1) < epsilon:
                 # explore
-                action = env.action_space.sample()
+                new_action = env.action_space.sample()
+                while truncated and new_action == action:
+                    new_action = env.action_space.sample()
+
+                action = new_action
+
+                counter_explore += 1
             else:
                 # exploit
                 action = np.argmax(qtable[state, :])
+                counter_exploit += 1
 
             # take action and observe reward
-            new_state, reward, done, info, _ = env.step(action)
+            new_state, reward, terminated, truncated, _ = env.step(action)
 
-            bar = discount_rate * np.max(qtable[new_state, :])
-
-            baz = qtable[state, action]
-
-            foo = (reward + bar - baz)
+            if truncated:
+                print("Truncated: reset state")
+                state, _ = env.reset()  # dont use info
+                break
 
             # Q-learning algorithm
-            qtable[state, action] = qtable[state, action] + learning_rate * foo
+            qtable[state, action] = (
+                    (1 - learning_rate) * qtable[state, action] +   # (1-alpha) * Q(s,a) +
+                    learning_rate *                                 # alpha * [ R(s,a,s’) + gamma * max’Q(s’,a’) ]
+                    (
+                            reward +
+                            discount_rate * np.max(qtable[new_state, :])
+                    )
+            )
 
             # Update to our new state
             state = new_state
 
-            # if done, finish episode
-            if done:
+            # # if terminated, finish episode
+            if terminated:
                 break
 
         # Decrease epsilon
-        epsilon = np.exp(-decay_rate * episode)
+        epsilon = np.exp(-0.005 * episode)
 
     print(f"Training completed over {num_episodes} episodes")
-    input("Press Enter to watch trained agent...")
 
     # watch trained agent
-    state = env.reset()
-    done = False
+    env: gym.Env = gym.make('FrozenLake-v1', is_slippery=False, render_mode="human")
+    state, _ = env.reset()
     rewards = 0
 
     for s in range(max_steps):
 
         print(f"TRAINED AGENT")
-        print("Step {}".format(s + 1))
+        print("Step {}".format(s+1))
 
         action = np.argmax(qtable[state, :])
-        new_state, reward, done, info, _ = env.step(action)
+        new_state, reward, terminated, truncated, _ = env.step(action)
         rewards += reward
-        env.render()
         print(f"score: {rewards}")
         state = new_state
 
-        if done:
-            break
+        if terminated:
+            if reward < 1.0:
+                print("You're dead.")
+                break
+            else:
+                print("You won - gg.")
+                break
 
-    env.close()
+    print(f"Exploited: {counter_exploit}; Explored: {counter_explore}")
+    # env.close()
 
 
 if __name__ == "__main__":
