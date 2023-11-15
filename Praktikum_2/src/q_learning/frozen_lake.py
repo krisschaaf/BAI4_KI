@@ -20,8 +20,8 @@ def main():
     # hyperparameters
     learning_rate = 0.9  # alpha
     discount_rate = 0.8  # gamma, discount factor to give more or less importance to the next reward
-    epsilon = 1.0        # explore vs exploit
-    decay_rate = 0.001   # Fixed amount to decrease epsilon
+    epsilon = 1.0  # explore vs exploit
+    decay_rate = 0.001  # Fixed amount to decrease epsilon
 
     # training variables
     num_episodes = 10000
@@ -57,8 +57,8 @@ def main():
 
             # Q-learning algorithm
             qtable[state, action] = (
-                    qtable[state, action] +   # (1-alpha) * Q(s,a) +
-                    learning_rate *                                 # alpha * [ R(s,a,s’) + gamma * max’Q(s’,a’) ]
+                    qtable[state, action] +  # (1-alpha) * Q(s,a) +
+                    learning_rate *  # alpha * [ R(s,a,s’) + gamma * max’Q(s’,a’) ]
                     (
                             reward +
                             discount_rate * np.max(qtable[new_state, :]) -
@@ -82,7 +82,7 @@ def main():
     for s in range(num_episodes):
 
         print(f"TRAINED AGENT")
-        print("Step {}".format(s+1))
+        print("Step {}".format(s + 1))
 
         action = np.argmax(qtable[state, :])
         new_state, reward, terminated, truncated, _ = env.step(action)
@@ -104,36 +104,24 @@ def main():
     print(f"optimal policy:\r\n{createOptimalPolicy(qtable)}")
 
 
-def createOptimalPolicy(qtable) -> ndarray[Any, dtype[Any]]:
+def createOptimalPolicy(qtable):
     optimalPolicy = []
 
     for field in qtable:
-        match np.argmax(field):
-            case 0:
-                if np.max(field) == 0.0:
-                    optimalPolicy.append("X")
-                else:
-                    optimalPolicy.append("left")
-            case 1:
-                if np.max(field) == 0.0:
-                    optimalPolicy.append("X")
-                else:
-                    optimalPolicy.append("down")
-            case 2:
-                if np.max(field) == 0.0:
-                    optimalPolicy.append("X")
-                else:
-                    optimalPolicy.append("right")
-            case 3:
-                if np.max(field) == 0.0:
-                    optimalPolicy.append("X")
-                else:
-                    optimalPolicy.append("up")
+        max_index = np.argmax(field)
+        if np.max(field) == 0.0:
+            optimalPolicy.append("X")
+        else:
+            optimalPolicy.append(action_to_str(max_index))
 
     array_1d = np.array(optimalPolicy)
     array_2d = array_1d.reshape((4, 4))
 
     return array_2d
+
+
+def action_to_str(action):
+    return ["left", "down", "right", "up"][action]
 
 
 if __name__ == "__main__":

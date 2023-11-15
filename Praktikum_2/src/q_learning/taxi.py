@@ -5,8 +5,7 @@ import random
 
 
 def main():
-    # env: gym.Env = gym.make('Taxi-v3', disable_env_checker=True)
-    env: gym.Env = gym.make('FrozenLake-v1', is_slippery=False)
+    env: gym.Env = gym.make('Taxi-v3')
 
     # initialize q-table
     state_size: Space = env.observation_space.n
@@ -16,11 +15,11 @@ def main():
     # hyperparameters
     learning_rate = 0.9  # alpha
     discount_rate = 0.8  # gamma, discount factor to give more or less importance to the next reward
-    epsilon = 1.0  # explore vs exploit
+    epsilon = 1.0        # explore vs exploit
+    decay_rate = 0.001   # Fixed amount to decrease epsilon
 
     # training variables
     num_episodes = 10000
-    max_steps = 100  # per episode
     counter_explore = 0
     counter_exploit = 0
 
@@ -32,20 +31,14 @@ def main():
         terminated = False
         truncated = False
 
-        action = env.action_space.sample()
 
-        for s in range(max_steps):
-        # while not terminated:
+        # for s in range(max_steps):
+        while not terminated:
 
             # exploration vs exploitation
             if random.uniform(0, 1) < epsilon:
                 # explore
-                new_action = env.action_space.sample()
-                while truncated and new_action == action:
-                    new_action = env.action_space.sample()
-
-                action = new_action
-
+                action = env.action_space.sample()
                 counter_explore += 1
             else:
                 # exploit
@@ -62,32 +55,29 @@ def main():
 
             # Q-learning algorithm
             qtable[state, action] = (
-                    (1 - learning_rate) * qtable[state, action] +   # (1-alpha) * Q(s,a) +
+                    qtable[state, action] +   # (1-alpha) * Q(s,a) +
                     learning_rate *                                 # alpha * [ R(s,a,s’) + gamma * max’Q(s’,a’) ]
                     (
                             reward +
-                            discount_rate * np.max(qtable[new_state, :])
+                            discount_rate * np.max(qtable[new_state, :]) -
+                            qtable[state, action]
                     )
             )
 
             # Update to our new state
             state = new_state
 
-            # # if terminated, finish episode
-            if terminated:
-                break
-
         # Decrease epsilon
-        epsilon = np.exp(-0.005 * episode)
+        epsilon = max(epsilon - decay_rate, 0)
 
     print(f"Training completed over {num_episodes} episodes")
 
     # watch trained agent
-    env: gym.Env = gym.make('FrozenLake-v1', is_slippery=False, render_mode="human")
+    env: gym.Env = gym.make('Taxi-v3', render_mode="rgb_array_list")
     state, _ = env.reset()
     rewards = 0
 
-    for s in range(max_steps):
+    for s in range(num_episodes):
 
         print(f"TRAINED AGENT")
         print("Step {}".format(s+1))
@@ -95,6 +85,7 @@ def main():
         action = np.argmax(qtable[state, :])
         new_state, reward, terminated, truncated, _ = env.step(action)
         rewards += reward
+        env.render()
         print(f"score: {rewards}")
         state = new_state
 
