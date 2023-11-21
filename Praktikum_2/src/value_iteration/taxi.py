@@ -36,7 +36,7 @@ def value_iteration(_env, _num_iterations, _epsilon, _discount_rate):
 
 
 if __name__ == "__main__":
-    env = gym.make('FrozenLake-v1', is_slippery=True)
+    env = gym.make('Taxi-v3')
 
     # value iteration hyperparameters
     num_iterations = 10000
@@ -47,4 +47,4 @@ if __name__ == "__main__":
     optimal_policy = value_iteration(env, num_iterations, epsilon, discount_rate)
 
     print("Optimal Policy:")
-    print(optimal_policy.reshape(4, 4))
+    print(optimal_policy)

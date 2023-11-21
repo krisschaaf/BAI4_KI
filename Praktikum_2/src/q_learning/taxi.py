@@ -1,66 +1,50 @@
+import sys
 import gym
 import numpy as np
 from gym import *
 import random
 
 
-def main():
-    env: gym.Env = gym.make('Taxi-v3')
-
-    # initialize q-table
-    state_size: Space = env.observation_space.n
-    action_size: Space = env.action_space.n
-    qtable = np.zeros((state_size, action_size))
-
-    # hyperparameters
-    learning_rate = 0.9  # alpha
-    discount_rate = 0.8  # gamma, discount factor to give more or less importance to the next reward
-    epsilon = 1.0        # explore vs exploit
-    decay_rate = 0.001   # Fixed amount to decrease epsilon
-
-    # training variables
-    num_episodes = 10000
+def q_learning(_env, _qtable, _num_iterations, _epsilon, _discount_rate, _learning_rate, _decay_rate):
     counter_explore = 0
     counter_exploit = 0
 
     # training
-    for episode in range(num_episodes):
+    for _ in range(_num_iterations):
+        delta = 0
 
         # reset the environment
-        state, _ = env.reset()  # dont use info
+        state, _ = _env.reset()  # dont use info
         terminated = False
-        truncated = False
 
-
-        # for s in range(max_steps):
         while not terminated:
 
             # exploration vs exploitation
-            if random.uniform(0, 1) < epsilon:
+            if random.uniform(0, 1) < _epsilon:
                 # explore
-                action = env.action_space.sample()
+                action = _env.action_space.sample()
                 counter_explore += 1
             else:
                 # exploit
-                action = np.argmax(qtable[state, :])
+                action = np.argmax(_qtable[state, :])
                 counter_exploit += 1
 
             # take action and observe reward
-            new_state, reward, terminated, truncated, _ = env.step(action)
+            new_state, reward, terminated, truncated, _ = _env.step(action)
 
             if truncated:
                 print("Truncated: reset state")
-                state, _ = env.reset()  # dont use info
+                state, _ = _env.reset()  # dont use info
                 break
 
             # Q-learning algorithm
-            qtable[state, action] = (
-                    qtable[state, action] +   # (1-alpha) * Q(s,a) +
-                    learning_rate *                                 # alpha * [ R(s,a,s’) + gamma * max’Q(s’,a’) ]
+            _qtable[state, action] = (
+                    _qtable[state, action] +  # (1-alpha) * Q(s,a) +
+                    _learning_rate *  # alpha * [ R(s,a,s’) + gamma * max’Q(s’,a’) ]
                     (
                             reward +
-                            discount_rate * np.max(qtable[new_state, :]) -
-                            qtable[state, action]
+                            _discount_rate * np.max(_qtable[new_state, :]) -
+                            _qtable[state, action]
                     )
             )
 
@@ -68,24 +52,26 @@ def main():
             state = new_state
 
         # Decrease epsilon
-        epsilon = max(epsilon - decay_rate, 0)
+        _epsilon = max(_epsilon - _decay_rate, 0)
 
-    print(f"Training completed over {num_episodes} episodes")
+    print(f"Training completed over {_num_iterations} episodes")
+    print(f"\r\nExploited: {counter_exploit}; Explored: {counter_explore}")
 
+
+def watchTrainedAgent(_num_iterations, _qtable):
     # watch trained agent
-    env: gym.Env = gym.make('Taxi-v3', render_mode="rgb_array_list")
-    state, _ = env.reset()
+    _env: gym.Env = gym.make('Taxi-v3')
+    state, _ = _env.reset()
     rewards = 0
 
-    for s in range(num_episodes):
+    for s in range(_num_iterations):
 
         print(f"TRAINED AGENT")
-        print("Step {}".format(s+1))
+        print("Step {}".format(s + 1))
 
-        action = np.argmax(qtable[state, :])
-        new_state, reward, terminated, truncated, _ = env.step(action)
+        action = np.argmax(_qtable[state, :])
+        new_state, reward, terminated, truncated, _ = _env.step(action)
         rewards += reward
-        env.render()
         print(f"score: {rewards}")
         state = new_state
 
@@ -97,9 +83,26 @@ def main():
                 print("You won - gg.")
                 break
 
-    print(f"Exploited: {counter_exploit}; Explored: {counter_explore}")
-    # env.close()
+    np.set_printoptions(threshold=sys.maxsize)
 
 
 if __name__ == "__main__":
-    main()
+    env: gym.Env = gym.make('Taxi-v3')
+
+    # hyperparameters
+    learning_rate = 0.92  # alpha
+    discount_rate = 0.95  # gamma, discount factor to give more or less importance to the next reward
+    epsilon = 0.9  # explore vs exploit
+    decay_rate = 0.005  # Fixed amount to decrease epsilon
+    num_iterations = 5000
+
+    state_size: Space = env.observation_space.n
+    action_size: Space = env.action_space.n
+    qtable = np.zeros((state_size, action_size))
+
+    q_learning(env, qtable, num_iterations, discount_rate, epsilon, learning_rate, decay_rate)
+    watchTrainedAgent(num_iterations, qtable)
+
+
+    print("\r\nOptimal Policy:")
+    # print(qtable)
