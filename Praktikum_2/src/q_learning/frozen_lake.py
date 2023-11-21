@@ -121,7 +121,7 @@ if __name__ == "__main__":
     qtable = np.zeros((state_size, action_size))
 
     q_learning(env, qtable, num_iterations, discount_rate, epsilon, learning_rate, decay_rate)
-    watchTrainedAgent(num_iterations, qtable)
+    # watchTrainedAgent(num_iterations, qtable)
 
     optimal_policy = createOptimalPolicy(qtable)
 

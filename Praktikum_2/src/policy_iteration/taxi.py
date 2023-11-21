@@ -74,24 +74,21 @@ def policy_iteration(_env, _num_iterations, _discount_rate, _epsilon):
     return V, policy
 
 
-def createOptimalPolicy(policy):
-    optimalPolicy = []
-
-    for field in policy:
-        optimalPolicy.append(action_to_str(field))
-
-    array_1d = np.array(optimalPolicy)
-    array_2d = array_1d.reshape((4, 4))
-
-    return array_2d
-
-
-def action_to_str(action):
-    return ["left", "down", "right", "up"][action]
+# def createOptimalPolicy(policy):
+    # TODO
+    # optimalPolicy = []
+    #
+    # for field in policy:
+    #     optimalPolicy.append(action_to_str(field))
+    #
+    # array_1d = np.array(optimalPolicy)
+    # array_2d = array_1d.reshape((4, 4))
+    #
+    # return array_2d
 
 
 if __name__ == "__main__":
-    env = gym.make('FrozenLake-v1', is_slippery=True)
+    env = gym.make('Taxi-v3')
 
     # policy iteration hyperparameters
     num_iterations = 10000
@@ -102,7 +99,8 @@ if __name__ == "__main__":
     optimal_values, optimal_policy = policy_iteration(env, num_iterations, discount_rate, epsilon)
 
     print("Optimal Values:")
-    print(optimal_values.reshape(4, 4))
+    print(optimal_values)
 
     print("Optimal Policy:")
-    print(createOptimalPolicy(optimal_policy).reshape(4,4))
+    # print(createOptimalPolicy(optimal_policy))
+    print(optimal_policy)
