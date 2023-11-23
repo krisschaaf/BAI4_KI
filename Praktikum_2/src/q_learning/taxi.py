@@ -87,8 +87,7 @@ def watchTrainedAgent(_num_iterations, _qtable):
 
 
 if __name__ == "__main__":
-    env: gym.Env = gym.make('Taxi-v3')
-
+    env: gym.Env = gym.make('Taxi-v3', render_mode="ansi")
     # hyperparameters
     learning_rate = 0.92  # alpha
     discount_rate = 0.95  # gamma, discount factor to give more or less importance to the next reward
