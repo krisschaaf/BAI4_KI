@@ -3,6 +3,7 @@ import gym
 import numpy as np
 from gym import *
 import random
+from IPython.display import clear_output
 
 
 def q_learning(_env, _qtable, _num_iterations, _epsilon, _discount_rate, _learning_rate, _decay_rate):
@@ -86,6 +87,50 @@ def watchTrainedAgent(_num_iterations, _qtable):
     np.set_printoptions(threshold=sys.maxsize)
 
 
+def calculatePathByOptimalPolicy(taxi_row, taxi_column, passenger_location, destination, _optimal_policy, _env):
+    passenger_matrix = np.array([[0, 0], [0, 4], [4, 0], [4, 3]])
+    pathByOptimalPolicy = []
+    _env.reset()
+
+    while True:
+        state = _env.encode(taxi_row, taxi_column, passenger_location, destination)
+        action = np.argmax(_optimal_policy[state])
+        pathByOptimalPolicy.append(state)
+        _env.s = state
+        p = _env.render()
+        print(p)
+        match action:
+            case 0:
+                taxi_column += 1
+            case 1:
+                taxi_column -= 1
+            case 2:
+                taxi_row += 1
+            case 3:
+                taxi_row -= 1
+            case 4:
+                if passenger_location == 4:
+                    raise Exception("Taxi trying to pick up passenger who is already inside the car.")
+
+                if np.array_equal(passenger_matrix[passenger_location], [taxi_row, taxi_column]):
+                    passenger_location = 4
+                else:
+                    raise Exception("Taxi trying to pick up passenger who is not on the designated pick up field.")
+            case 5:
+                if passenger_location != 4:
+                    raise Exception("Taxi trying to drop off passenger who is not inside the car.")
+
+                if not np.array_equal([taxi_row, taxi_column], passenger_matrix[destination]):
+                    state = _env.encode(taxi_row, taxi_column, passenger_location, destination)
+                    pathByOptimalPolicy.append(state)
+
+                    break
+                else:
+                    raise Exception("Taxi trying to drop off passenger at the wrong destination.")
+
+    return pathByOptimalPolicy
+
+
 if __name__ == "__main__":
     env: gym.Env = gym.make('Taxi-v3', render_mode="ansi")
     # hyperparameters
@@ -104,4 +149,7 @@ if __name__ == "__main__":
 
 
     print("\r\nOptimal Policy:")
-    # print(qtable)
+    print(qtable)
+
+    path = calculatePathByOptimalPolicy(0, 0, 0, 2, qtable, env)
+    print(path)
