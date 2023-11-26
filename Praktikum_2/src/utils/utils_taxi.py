@@ -103,11 +103,9 @@ def calculatePathByOptimalPolicyHelper(taxi_row, taxi_column, passenger_location
 
 def calculatePathByOptimalPolicy(_qtable, _env, strategy: Strategy):
     for key in states_to_calculate:
-        path = calculatePathByOptimalPolicyHelper(
-            states_to_calculate[key][0],
-            states_to_calculate[key][1],
-            states_to_calculate[key][2],
-            states_to_calculate[key][3],
-            _qtable, _env, strategy)
-
-        print(f"path {key}: {path}")
+        taxi_row, taxi_column, passenger_location, destination = states_to_calculate[key]
+        path = (
+            calculatePathByOptimalPolicyHelper(
+                taxi_row, taxi_column, passenger_location, destination, _qtable, _env, strategy)
+        )
+        print(f"Optimal path for {key}: {path}")
