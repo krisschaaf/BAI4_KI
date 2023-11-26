@@ -54,7 +54,8 @@ def watchTrainedAgent(_num_iterations, _optimal_policy, _env, strategy: Strategy
     np.set_printoptions(threshold=sys.maxsize)
 
 
-def calculatePathByOptimalPolicyHelper(taxi_row, taxi_column, passenger_location, destination, optimal_policy, env, strategy: Strategy):
+def calculatePathByOptimalPolicyHelper(taxi_row, taxi_column, passenger_location, destination, optimal_policy, env,
+                                       strategy: Strategy):
     passenger_matrix = np.array([[0, 0], [4, 0], [0, 4], [3, 4]])
     pathByOptimalPolicy = []
     env.reset()
@@ -67,7 +68,6 @@ def calculatePathByOptimalPolicyHelper(taxi_row, taxi_column, passenger_location
             action = optimal_policy[state]
         else:
             action = np.argmax(optimal_policy[state, :])
-
 
         match action:
             case 0:
