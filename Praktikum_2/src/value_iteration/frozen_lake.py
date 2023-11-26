@@ -8,31 +8,31 @@ def value_iteration(_env, _num_iterations, _epsilon, _discount_rate):
     action_size = _env.action_space.n
 
     # initialize value function
-    optimal_policy = np.zeros(state_size)
+    _optimal_policy = np.zeros(state_size)
 
     for _ in range(_num_iterations):
         delta = 0
 
         for state in range(state_size):
-            current_state = optimal_policy[state]
+            current_state = _optimal_policy[state]
             action_values = []
 
             for action in range(action_size):
                 state_value = 0
                 for probability, next_state, reward, _ in _env.P[state][action]:
-                    state_action_value = probability * (reward + _discount_rate * optimal_policy[next_state])
+                    state_action_value = probability * (reward + _discount_rate * _optimal_policy[next_state])
                     state_value += state_action_value
                 action_values.append(state_value)
 
-            optimal_policy[state] = max(action_values)
+            _optimal_policy[state] = max(action_values)
 
-            delta = max(delta, abs(current_state - optimal_policy[state]))
+            delta = max(delta, abs(current_state - _optimal_policy[state]))
 
         # delta converges to epsilon -> stop
         if delta < _epsilon:
             break
 
-    return optimal_policy
+    return _optimal_policy
 
 
 if __name__ == "__main__":

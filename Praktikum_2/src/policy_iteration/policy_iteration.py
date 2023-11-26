@@ -14,7 +14,10 @@ def evaluate_policy(_env, policy, _discount_rate, _epsilon):
             v = V[state]
             action = policy[state]
             # update value function using the current policy
-            V[state] = sum([p * (r + _discount_rate * V[next_state]) for p, next_state, r, _ in _env.P[state][action]]) # TODO: reshape
+            values = 0
+            for p, next_state, r, _ in _env.P[state][action]:
+                values += p * (r + _discount_rate * V[next_state])
+            V[state] = values
             delta = max(delta, abs(v - V[state]))
 
         if delta < _epsilon:

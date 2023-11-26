@@ -10,40 +10,40 @@ def value_iteration(_env, _num_iterations, _epsilon, _discount_rate):
     action_size = _env.action_space.n
 
     # initialize value function
-    V = np.zeros(state_size)
+    _V = np.zeros(state_size)
 
     for _ in range(_num_iterations):
         delta = 0
 
         for state in range(state_size):
-            current_state = V[state]
+            current_state = _V[state]
             A = np.zeros(action_size)
 
             for action in range(action_size):
                 for probability, next_state, reward, _ in _env.P[state][action]:
-                    A[action] += probability * (reward + _discount_rate * V[next_state])
+                    A[action] += probability * (reward + _discount_rate * _V[next_state])
 
-            V[state] = max(A)
+            _V[state] = max(A)
 
-            delta = max(delta, abs(current_state - V[state]))
+            delta = max(delta, abs(current_state - _V[state]))
 
         # delta converges to epsilon -> stop
         if delta < _epsilon:
             break
 
-    policy = np.zeros([state_size, action_size])
+    _optimal_policy = np.zeros([state_size, action_size])
 
     for state in range(state_size):  # for all states, create deterministic policy
 
         A = np.zeros(action_size)
         for action in range(action_size):
             for probability, next_state, reward, _ in _env.P[state][action]:
-                A[action] += probability * (reward + _discount_rate * V[next_state])
+                A[action] += probability * (reward + _discount_rate * _V[next_state])
 
         best_action = np.argmax(A)
-        policy[state][best_action] = 1
+        _optimal_policy[state][best_action] = 1
 
-    return V, policy
+    return _V, _optimal_policy
 
 
 if __name__ == "__main__":

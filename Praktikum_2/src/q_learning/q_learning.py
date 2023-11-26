@@ -8,8 +8,6 @@ def q_learning(_env, _qtable, _num_iterations, _epsilon, _discount_rate, _learni
 
     # training
     for _ in range(_num_iterations):
-        delta = 0
-
         # reset the environment
         state, _ = _env.reset()  # dont use info
         terminated = False
