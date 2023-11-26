@@ -61,11 +61,13 @@ def calculatePathByOptimalPolicyHelper(taxi_row, taxi_column, passenger_location
 
     while True:
         state = env.encode(taxi_row, taxi_column, passenger_location, destination)
+        pathByOptimalPolicy.append(state)
 
         if strategy == Strategy.POLICY_ITERATION:
             action = optimal_policy[state]
         else:
             action = np.argmax(optimal_policy[state, :])
+
 
         match action:
             case 0:

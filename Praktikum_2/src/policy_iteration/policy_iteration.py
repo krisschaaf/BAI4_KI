@@ -37,11 +37,10 @@ def improve_policy(_env, V, _discount_rate):
 
         # Calculate action values for each action in the current state
         for action in range(action_size):
-            transition_probabilities = _env.P[state][action]
-
             # Calculate the action value for the current action
-            action_value = sum(
-                [p * (r + _discount_rate * V[next_state]) for p, next_state, r, _ in transition_probabilities])
+            action_value = 0
+            for p, next_state, r, _ in _env.P[state][action]:
+                action_value += p * (r + _discount_rate * V[next_state])
 
             # Append the action value to the list
             action_values.append(action_value)
