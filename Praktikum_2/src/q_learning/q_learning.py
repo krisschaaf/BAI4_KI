@@ -34,12 +34,11 @@ def q_learning(_env, _qtable, _num_iterations, _epsilon, _discount_rate, _learni
 
             # Q-learning algorithm
             _qtable[state, action] = (
-                    _qtable[state, action] +  # (1-alpha) * Q(s,a) +
+                (1 - _learning_rate)* _qtable[state, action] +  # Q(s,a) +
                     _learning_rate *  # alpha * [ R(s,a,s’) + gamma * max’Q(s’,a’) ]
                     (
                             reward +
-                            _discount_rate * np.max(_qtable[new_state, :]) -
-                            _qtable[state, action]
+                            _discount_rate * np.max(_qtable[new_state, :])
                     )
             )
 

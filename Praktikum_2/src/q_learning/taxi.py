@@ -10,7 +10,7 @@ from src.utils.utils_taxi import watchTrainedAgent, calculatePathByOptimalPolicy
 if __name__ == "__main__":
     env: gym.Env = gym.make('Taxi-v3', render_mode="ansi")
     # hyperparameters
-    learning_rate = 0.92  # alpha
+    learning_rate = 0.08  # alpha
     discount_rate = 0.95  # gamma, discount factor to give more or less importance to the next reward
     epsilon = 0.9  # explore vs exploit
     decay_rate = 0.005  # Fixed amount to decrease epsilon
