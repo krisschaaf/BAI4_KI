@@ -10,7 +10,7 @@ from ColumnNames import ColumnNames
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 
 
-data = pd.read_csv('Praktikum3_Datensatz.csv')
+data = pd.read_csv('../../Praktikum3_Datensatz.csv')
 
 x, y = (
     data[[
