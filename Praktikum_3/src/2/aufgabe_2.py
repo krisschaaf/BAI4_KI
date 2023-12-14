@@ -35,6 +35,7 @@ categorical_transformer = Pipeline(
         ("selector", SelectPercentile(chi2, percentile=50)),
     ]
 )
+
 preprocessor = ColumnTransformer(
     transformers=[
         ("num", numeric_transformer, numeric_features),
@@ -43,7 +44,7 @@ preprocessor = ColumnTransformer(
 )
 
 clf = Pipeline(
-    steps=[("preprocessor", preprocessor), ("classifier", LogisticRegression())]
+    steps=[("preprocessor", preprocessor), ("classifier", LogisticRegression(solver='liblinear', penalty='l1'))]
 )
 
 X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=0)
@@ -51,7 +52,7 @@ X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_
 clf.fit(X_train, y_train)  # Fit the model according to the given training data.
 accuracy_model = clf.score(X_test, y_test)
 
-print("Model score: %.3f" % accuracy_model)  # Return the mean accuracy on the given test data and labels.
+print("Accuracy by Pipeline: %.3f" % accuracy_model)  # Return the mean accuracy on the given test data and labels.
 
 y_pred = clf.predict(X_test)
 
@@ -59,7 +60,7 @@ accuracy_metric = accuracy_score(y_test, y_pred)
 precision_metric = precision_score(y_test, y_pred, average='weighted')
 recall_metric = recall_score(y_test, y_pred, average='macro')
 
-print("Accuracy: %.3f" % accuracy_metric)
+print("Accuracy by Metrics: %.3f\r\n" % accuracy_metric)
 print("Precision: %.3f" % precision_metric)
 print("Recall: %.3f" % recall_metric)
 
