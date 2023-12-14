@@ -64,3 +64,19 @@ print("Accuracy by Metrics: %.3f\r\n" % accuracy_metric)
 print("Precision: %.3f" % precision_metric)
 print("Recall: %.3f" % recall_metric)
 
+# Für die Testdaten, welche ja beim späteren Testdurchlauf auch
+# standardisiert werden müssen, werden dann die (für die jeweiligen Spalten) auf dem
+# Trainingsdatensatz ermittelten Mittel- und Varianzwerte für die Standardisierung verwendet (warum?).
+# → Wir haben die Daten in 20 % Test- und 80 % Trainingsdaten eingeteilt, um sicherzustellen,
+# → dass wir nicht alle Daten auswendig lernen.
+# → Es werden nun die standardisierten Mittel- und Varianzwerte der Trainingsdaten auf die Testdaten angewendet
+# → um zu testen, ob das gelernte auch auf andere Daten(mit gleicher Inputstruktur aber anderen Werten) anwendbar ist.
+
+# Was ist mit dem Parameter 'penalty' einstellbar?
+# → Hiermit kann die Art der Strafe, also die Regularisierung vorgegeben werden (L1, L2, None; abhängig vom Solver)
+# → die auf die Kostenfunktion angewendet wird, um Overfitting zu vermeiden.
+
+# Was ist grundsätzlich die jeweilige Aussagekraft dieser Metriken (Accuracy, Precision, Recall)?
+# → Accuracy ermittelt den prozentualen Anteil der korrekten Vorhersagen (𝐓𝐏 + 𝐓𝐍) / (𝐓𝐏 + 𝐅𝐍 + 𝐅𝐏 + 𝐓𝐍).
+# → Precision ist der Prozentsatz korrekter Antworten unter allen positiven Antworten TP/(TP+FP).
+# → Recall ist der Prozentsatz korrekter Antworten unter allen positiven Eingaben. TP/(TP+TN)
