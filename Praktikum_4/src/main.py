@@ -69,6 +69,10 @@ if __name__ == '__main__':
                                                     test_size=test_ratio / (test_ratio + validation_ratio))
 
     clf.fit_transform(X_train, y_train)  # Fit the model according to the given training data.
+
+    # TODO: Standardisierung der Daten funktioniert noch nicht -> dadurch können die Tensor Werte noch nicht
+    #  transformiert werden
+
     # Überführen in Tensor Datensätze
     tensor_X_train = torch.Tensor(X_train.values.astype(float))
     tensor_y_train = torch.Tensor(y_train)
