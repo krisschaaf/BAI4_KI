@@ -40,14 +40,14 @@ def visualize(_current_w1, _current_w2, _x1, _x2, _y_tar, title):
 if __name__ == '__main__':
 
     # # Datensatz 1
-    # w1 = -6.5
-    # w2 = -9.5
-    # alpha = 0.05
+    w1 = -6.5
+    w2 = -9.5
+    alpha = 0.05
 
     # Datensatz 2
-    w1 = 0.0
-    w2 = -0.5
-    alpha = 0.05
+    # w1 = 0.0
+    # w2 = -0.5
+    # alpha = 0.05
 
     w1_start = w1
     w2_start = w2
@@ -60,7 +60,7 @@ if __name__ == '__main__':
     visualize(_current_w1=w1, _current_w2=w2, _x1=x1, _x2=x2, _y_tar=y_tar, title="Fehlergebirge - Start")
 
     # Schrittweise Näherung des/eines Minimums
-    for x in range(1000):
+    for x in range(100):
         w1 = w1 - alpha * (x1 * np.cos(x1 * w1) * (np.sin(x1 * w1) - y_tar + np.cos(w2 * x2) + w2))
         w2 = w2 - alpha * (np.cos(x2 * w2) + w2 - y_tar + np.sin(w1 * x1)) * (1 - x2 * np.sin(x2 * w2))
 
