@@ -1,6 +1,4 @@
 import torch
-from sklearn import preprocessing
-from sklearn.feature_selection import SelectPercentile, chi2
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
@@ -9,6 +7,7 @@ from sklearn.pipeline import Pipeline
 import pandas as pd
 from torch import nn
 from torch.utils.data import TensorDataset, DataLoader
+import matplotlib.pyplot as plt
 
 from ColumnNames import ColumnNames
 
@@ -17,24 +16,24 @@ train_ratio = 0.8
 validation_ratio = 0.1
 test_ratio = 0.1
 
-input_size = 6
+input_size = 9
 hidden_size = 4
 output_size = 1
 
-num_epochs = 100
+num_epochs = 5
 
 
 if __name__ == '__main__':
-    data = pd.read_csv('../Praktikum4_Datensatz.csv')
+    X = pd.read_csv('../Praktikum4_Datensatz.csv')
 
     x, y = (
-        data[[
+        X[[
             ColumnNames.Grundstuecksgroesse.value,
             ColumnNames.Stadt.value,
             ColumnNames.Hausgroesse.value,
             ColumnNames.Kriminalitaetsindex.value,
             ColumnNames.Baujahr.value]
-        ], data[ColumnNames.Klasse.value]
+        ], X[ColumnNames.Klasse.value]
     )
 
     X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=1 - train_ratio)
@@ -45,14 +44,16 @@ if __name__ == '__main__':
     # https://scikit-learn.org/stable/auto_examples/compose/plot_column_transformer_mixed_types.html
     numeric_features = [ColumnNames.Grundstuecksgroesse.value, ColumnNames.Hausgroesse.value, ColumnNames.Baujahr.value]
     numeric_transformer = Pipeline(
-        steps=[("imputer", SimpleImputer(strategy="median")), ("scaler", StandardScaler())]
+        steps=[
+            ("imputer", SimpleImputer(strategy="median")),
+            ("scaler", StandardScaler())
+        ]
     )
 
     categorical_features = [ColumnNames.Stadt.value, ColumnNames.Kriminalitaetsindex.value]
     categorical_transformer = Pipeline(
         steps=[
-            ("encoder", OneHotEncoder()),
-            ("selector", SelectPercentile(chi2, percentile=50)),
+            ("encoder", OneHotEncoder())
         ]
     )
 
@@ -92,8 +93,8 @@ if __name__ == '__main__':
     val_dataset = TensorDataset(tensor_X_val, tensor_y_val)
 
     train_dataloader = DataLoader(train_dataset, batch_size=4, shuffle=True)
-    test_dataloader = DataLoader(test_dataset, batch_size=1, shuffle=False)
-    val_dataloader = DataLoader(val_dataset, batch_size=1, shuffle=False)
+    test_dataloader = DataLoader(test_dataset, batch_size=4, shuffle=True)
+    val_dataloader = DataLoader(val_dataset, batch_size=4, shuffle=True)
 
     model = nn.Sequential(
         nn.Linear(input_size, hidden_size),
@@ -109,14 +110,36 @@ if __name__ == '__main__':
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
     model.train()
+    epoch_loss_train_plot = []
+    epoch_loss_val_plot = []
 
     for n in range(num_epochs):
-        for step, (X, y) in enumerate(train_dataloader):
+        epoch_loss_train = 0
+        for X, y in train_dataloader:
+            y_pred = model(X)
+            loss = loss_function(torch.squeeze(y_pred), y)  # Soll-Ist-Wert Vergleich mit Fehlerfunktion
+            epoch_loss_train += loss.item()
+            optimizer.zero_grad()  # Gradient ggf. vom vorherigen Durchlauf auf 0 setzen
+            loss.backward()  # Backpropagation
+            optimizer.step()  # Gradientenschritt
+        epoch_loss_train_plot.append(epoch_loss_train)
+
+        epoch_loss_val = 0
+        model.eval()
+        for X, y in val_dataloader:
             y_pred = model(X)
             loss = loss_function(torch.squeeze(y_pred), y)
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+            epoch_loss_val += loss.item()
+        epoch_loss_val_plot.append(epoch_loss_val)
+
+    plt.rcParams["figure.figsize"] = [7.50, 3.50]
+    plt.rcParams["figure.autolayout"] = True
+
+    plt.title("Loss")
+    plt.plot(epoch_loss_train_plot, color='red', label='train')
+    plt.plot(epoch_loss_val_plot, color='blue', label='val')
+    plt.legend()
+    plt.show()
 
 
 
