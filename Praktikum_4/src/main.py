@@ -18,10 +18,10 @@ validation_ratio = 0.1
 test_ratio = 0.1
 
 input_size = 9
-hidden_size = 4
+hidden_size = 200
 output_size = 1
 
-num_epochs = 100
+num_epochs = 200
 learning_rate = 0.001
 
 
@@ -129,7 +129,7 @@ if __name__ == '__main__':
 
     loss_function = nn.BCELoss()
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=learning_rate)
 
     epoch_loss_train_plot = []
     epoch_loss_val_plot = []
@@ -148,11 +148,15 @@ if __name__ == '__main__':
 
         epoch_loss_val = 0
         model.eval()
-        for X, y in val_dataloader:
-            y_pred = model(X)
-            loss = loss_function(torch.squeeze(y_pred), y)
-            epoch_loss_val += loss.item()
-        epoch_loss_val_plot.append(epoch_loss_val)
+        with torch.no_grad():
+            for X, y in val_dataloader:
+                y_pred = model(X)
+                epoch_val_data.append(y)
+                epoch_val_pred.append(y_pred)
+                loss = loss_function(torch.squeeze(y_pred), y)
+                epoch_loss_val += loss.item()
+
+        epoch_loss_val_plot.append(epoch_loss_val / len(val_dataset))
 
         if check_for_early_stop(epoch_loss_val_plot):
             break

@@ -7,10 +7,10 @@ def calculateMetrics(train_dataloader, val_dataloader, test_dataloader, model):
     accuracy_test, precision_test, recall_test = calc(test_dataloader, model)
 
     print('Accuracy of train data: {}'.format(accuracy_train))
-    print('Accuracy of val data: {}'.format(accuracy_val))
     print('Precision of train data: {}'.format(precision_train))
-    print('Precision of val data: {}'.format(precision_val))
     print('Recall of train data: {}'.format(recall_train))
+    print('Accuracy of val data: {}'.format(accuracy_val))
+    print('Precision of val data: {}'.format(precision_val))
     print('Recall of val data: {}'.format(recall_val))
     print('Accuracy of test data: {}'.format(accuracy_test))
     print('Precision of test data: {}'.format(precision_test))
