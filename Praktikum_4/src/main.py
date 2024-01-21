@@ -114,16 +114,28 @@ if __name__ == '__main__':
     test_dataset = TensorDataset(tensor_X_test, tensor_y_test)
     val_dataset = TensorDataset(tensor_X_val, tensor_y_val)
 
-    train_dataloader = DataLoader(train_dataset, batch_size=4, shuffle=True)
-    test_dataloader = DataLoader(test_dataset, batch_size=4, shuffle=True)
-    val_dataloader = DataLoader(val_dataset, batch_size=4, shuffle=True)
+    train_dataloader = DataLoader(train_dataset, batch_size=200, shuffle=True)
+    test_dataloader = DataLoader(test_dataset, batch_size=50, shuffle=False)
+    val_dataloader = DataLoader(val_dataset, batch_size=50, shuffle=False)
 
     model = nn.Sequential(
         nn.Linear(input_size, hidden_size),
+        # nn.Tanh(),
+        # nn.Linear(hidden_size, hidden_size),
+        # nn.Tanh(),
         nn.Tanh(),
-        nn.Linear(hidden_size, hidden_size),
+        nn.BatchNorm1d(hidden_size),
+        nn.Linear(hidden_size, 30),
         nn.Tanh(),
-        nn.Linear(hidden_size, output_size),
+        nn.BatchNorm1d(30),
+        nn.Linear(30, 15),
+        nn.Tanh(),
+        nn.BatchNorm1d(15),
+        nn.Linear(15, 5),
+        nn.Tanh(),
+        nn.BatchNorm1d(5),
+        nn.Linear(5, output_size),
+        #nn.LazyLinear(output_size),
         nn.Sigmoid()
     )
 
@@ -137,14 +149,22 @@ if __name__ == '__main__':
     for n in range(num_epochs):
         epoch_loss_train = 0
         model.train()
+        epoch_train_pred = []
+        epoch_train_data = []
+        epoch_val_data = []
+        epoch_val_pred = []
+
         for X, y in train_dataloader:
             y_pred = model(X)
+            epoch_train_data.append(y)
+            epoch_train_pred.append(y_pred)
             loss = loss_function(torch.squeeze(y_pred), y)  # Soll-Ist-Wert Vergleich mit Fehlerfunktion
             epoch_loss_train += loss.item()
             optimizer.zero_grad()  # Gradient ggf. vom vorherigen Durchlauf auf 0 setzen
             loss.backward()  # Backpropagation
             optimizer.step()  # Gradientenschritt
-        epoch_loss_train_plot.append(epoch_loss_train)
+
+        epoch_loss_train_plot.append(epoch_loss_train/len(train_dataset))
 
         epoch_loss_val = 0
         model.eval()
@@ -165,4 +185,24 @@ if __name__ == '__main__':
 
     calculateMetrics(train_dataloader, val_dataloader, test_dataloader, model)
 
+# Für welche, eigentlich
+# immer genutzte und recht simple, Regularisierungsmethode sind diese Werte
+# notwendig?
+# → Early Stopping
 
+# 4. Warum? Wie nennt sich das in den obigen vier Schritten beschriebene Vorgehen?
+# → Kreuzvalidierung (2-fach)
+# → Dieser Prozess wird oft als Hyperparameter-Optimierung oder Modellfine-tuning bezeichnet.
+
+# Der Evaluierungsmodus ist insbesondere bei Dropout und Batch Normalization wichtig (Warum?).
+# → Im Evaluierungsmodus wird Dropout deaktiviert, da es keinen Sinn ergibt einzelne Neuronen zum Validieren
+#       auszuschalten.
+
+# → Während des Trainingsmodus werden die Mittelwerte und Standardabweichungen jeder Mini-Batch berechnet und
+#       verwendet, um die Normalisierung durchzuführen.
+#       Im Evaluierungsmodus möchte man jedoch eine konsistente Normalisierung basierend auf den gesamten Datensatz
+#       erhalten, nicht nur auf einer Mini-Batch. Daher werden während der Evaluierung die Mittelwerte und
+#       Standardabweichungen über den gesamten Datensatz berechnet und für die Normalisierung verwendet.
+
+# BatchNormalization und Dropout sollten nicht gleichzeitig verwendet werden !
+# Dropout zerstört die Batch-Statistik.

@@ -18,49 +18,50 @@ def calculateMetrics(train_dataloader, val_dataloader, test_dataloader, model):
 
 
 def calc(dataloader, model):
-    accuracy = 0
-    precision = 0
-    recall = 0
-    counter = 0
+    epoch_pred = []
+    epoch_data = []
+
     for X, y in dataloader:
-        a, p, r = calc_accuracy(model, X, y)
-        accuracy += a
-        precision += p
-        recall += r
-        counter += 1
+        y_pred = model(X)
+        epoch_data.append(y)
+        epoch_pred.append(y_pred)
 
-    return accuracy / counter, precision / counter, recall / counter
+    a, p, r = acc_prec_rec_score(torch.cat(epoch_pred), torch.cat(epoch_data))
+
+    return a, p, r
 
 
-# https://stackoverflow.com/questions/51503851/calculate-the-accuracy-every-epoch-in-pytorch/63271002#63271002
-def calc_accuracy(mdl: torch.nn.Module, X: torch.Tensor, Y: torch.Tensor) -> (float, float, float):
-    """
-    Get the accuracy with respect to the most likely label
+def convert_to_binary(predictions, threshold=0.5):
+    if predictions > threshold:
+        return 1
+    else:
+        return 0
 
-    :param mdl:
-    :param X:
-    :param Y:
-    :return:
-    """
-    # get the scores for each class (or logits)
-    y_logits = mdl(X)  # unnormalized probs
-    # return the values & indices with the largest value in the dimension where the scores for each class is
-    # get the scores with largest values & their corresponding idx (so the class that is most likely)
-    max_scores, max_idx_class = mdl(X).max(dim=1)  # [B, n_classes] -> [B], # get values & indices with the max vals in the dim with scores for each class/label
-    # usually 0th coordinate is batch size
-    _n = X.size(0)
-    assert(_n == max_idx_class.size(0))
-    # calulate acc (note .item() to do float division)
-    acc = (max_idx_class == Y).sum().item() / _n
 
-    # Calculate True Positives, False Positives, False Negatives
-    true_positives = ((max_idx_class == Y) & (Y == 1)).sum().item()
-    true_negatives = ((max_idx_class == Y) & (Y == 0)).sum().item()
-    false_positives = ((max_idx_class != Y) & (Y == 0)).sum().item()
-    false_negatives = ((max_idx_class != Y) & (Y == 1)).sum().item()
+def acc_prec_rec_score(y_pred, y):
+    acc = 0
+    true_positives = 0
+    true_negatives = 0
+    false_positives = 0
+    false_negatives = 0
 
-    # Calculate Precision and Recall
+    for pred in range(len(y_pred)):
+        binary_pred = convert_to_binary(y_pred[pred].item())
+        if binary_pred == y[pred].item():
+            acc += 1
+        match binary_pred:
+            case 1:
+                if y[pred].item() == 1:
+                    true_positives += 1
+                else:
+                    false_positives += 1
+            case 0:
+                if y[pred].item() == 0:
+                    true_negatives += 1
+                else:
+                    false_negatives += 1
+
     prec = true_positives / (true_positives + false_positives) if (true_positives + false_positives) != 0 else 0.0
     rec = true_positives / (true_positives + false_negatives) if (true_positives + false_negatives) != 0 else 0.0
 
-    return acc, prec, rec
+    return acc / len(y), prec, rec
