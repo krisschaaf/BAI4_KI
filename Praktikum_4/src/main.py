@@ -10,6 +10,7 @@ from torch.utils.data import TensorDataset, DataLoader
 import matplotlib.pyplot as plt
 
 from ColumnNames import ColumnNames
+from Metrics import calculateMetrics
 
 # define size of train, test and validation ratios
 train_ratio = 0.8
@@ -21,50 +22,27 @@ hidden_size = 4
 output_size = 1
 
 num_epochs = 100
+learning_rate = 0.001
 
 
-# https://stackoverflow.com/questions/51503851/calculate-the-accuracy-every-epoch-in-pytorch/63271002#63271002
-def calc_accuracy(mdl: torch.nn.Module, X: torch.Tensor, Y: torch.Tensor) -> (float, float, float):
-    """
-    Get the accuracy with respect to the most likely label
-
-    :param mdl:
-    :param X:
-    :param Y:
-    :return:
-    """
-    # get the scores for each class (or logits)
-    y_logits = mdl(X)  # unnormalized probs
-    # return the values & indices with the largest value in the dimension where the scores for each class is
-    # get the scores with largest values & their corresponding idx (so the class that is most likely)
-    max_scores, max_idx_class = mdl(X).max(dim=1)  # [B, n_classes] -> [B], # get values & indices with the max vals in the dim with scores for each class/label
-    # usually 0th coordinate is batch size
-    _n = X.size(0)
-    assert(_n == max_idx_class.size(0))
-    # calulate acc (note .item() to do float division)
-    acc = (max_idx_class == Y).sum().item() / _n
-
-    # Calculate True Positives, False Positives, False Negatives
-    true_positives = ((max_idx_class == Y) & (Y == 1)).sum().item()
-    true_negatives = ((max_idx_class == Y) & (Y == 0)).sum().item()
-    false_positives = ((max_idx_class != Y) & (Y == 0)).sum().item()
-    false_negatives = ((max_idx_class != Y) & (Y == 1)).sum().item()
-
-    # Calculate Precision and Recall
-    prec = true_positives / (true_positives + false_positives) if (true_positives + false_positives) != 0 else 0.0
-    rec = true_positives / (true_positives + false_negatives) if (true_positives + false_negatives) != 0 else 0.0
-
-    return acc, prec, rec
-
-
-def check_for_early_stop(epoch_loss_val_plot) -> bool:
-    if len(epoch_loss_val_plot) <= 5:
+def check_for_early_stop(_epoch_loss_val_plot) -> bool:
+    if len(_epoch_loss_val_plot) <= 5:
         return False
 
-    if epoch_loss_val_plot[-5] < epoch_loss_val_plot[-1]:
+    if _epoch_loss_val_plot[-5] < _epoch_loss_val_plot[-1]:
         return True
 
     return False
+
+
+def visualize(_epoch_loss_train_plot, _epoch_loss_val_plot):
+    plt.rcParams["figure.figsize"] = [7.50, 3.50]
+    plt.rcParams["figure.autolayout"] = True
+    plt.title("Loss")
+    plt.plot(_epoch_loss_train_plot, color='red', label='train')
+    plt.plot(_epoch_loss_val_plot, color='blue', label='val')
+    plt.legend()
+    plt.show()
 
 
 if __name__ == '__main__':
@@ -151,7 +129,7 @@ if __name__ == '__main__':
 
     loss_function = nn.BCELoss()
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
     epoch_loss_train_plot = []
     epoch_loss_val_plot = []
@@ -179,59 +157,8 @@ if __name__ == '__main__':
         if check_for_early_stop(epoch_loss_val_plot):
             break
 
-    plt.rcParams["figure.figsize"] = [7.50, 3.50]
-    plt.rcParams["figure.autolayout"] = True
+    visualize(epoch_loss_train_plot, epoch_loss_val_plot)
 
-    plt.title("Loss")
-    plt.plot(epoch_loss_train_plot, color='red', label='train')
-    plt.plot(epoch_loss_val_plot, color='blue', label='val')
-    plt.legend()
-    plt.show()
-
-    accuracy_train = 0
-    precision_train = 0
-    recall_train = 0
-    counter_train = 0
-    for X, y in train_dataloader:
-        a, p, r = calc_accuracy(model, X, y)
-        accuracy_train += a
-        precision_train += p
-        recall_train += r
-        counter_train += 1
-
-    accuracy_val = 0
-    precision_val = 0
-    recall_val = 0
-    counter_val = 0
-    for X, y in val_dataloader:
-        a, p, r = calc_accuracy(model, X, y)
-        accuracy_val += a
-        precision_val += p
-        recall_val += r
-        counter_val += 1
-
-    print('Accuracy of train data: {}'.format(accuracy_train / counter_train))
-    print('Accuracy of val data: {}'.format(accuracy_val / counter_val))
-
-    print('Precision of train data: {}'.format(precision_train / counter_train))
-    print('Precision of val data: {}'.format(precision_val / counter_val))
-
-    print('Recall of train data: {}'.format(recall_train / counter_train))
-    print('Recall of val data: {}'.format(recall_val / counter_val))
-
-    accuracy_test = 0
-    precision_test = 0
-    recall_test = 0
-    counter_test = 0
-    for X, y in test_dataloader:
-        a, p, r = calc_accuracy(model, X, y)
-        accuracy_test += a
-        precision_test += p
-        recall_test += r
-        counter_test += 1
-
-    print('Accuracy of test data: {}'.format(accuracy_test / counter_test))
-    print('Precision of test data: {}'.format(precision_test / counter_test))
-    print('Recall of test data: {}'.format(recall_test / counter_test))
+    calculateMetrics(train_dataloader, val_dataloader, test_dataloader, model)
 
 
